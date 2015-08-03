@@ -7,3 +7,7 @@ body {
 footer {
   margin: 50px 0;
 }
+.fixed{
+  position: fixed;
+  z-index: 3;
+}
