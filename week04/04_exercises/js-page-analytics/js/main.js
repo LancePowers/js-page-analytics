@@ -1,15 +1,17 @@
 
 var popup = new AnalyticsWindow();
 $(document).on('ready', function() {
+  popup.startTime = $.now();
   $(window).scroll(function (event) {
       popup.scroll = $(window).scrollTop();
       if(scroll > popup.maxView){popup.maxView = scroll;}
       popup.totalScroll = popup.scrollUpdate();
       popup.lastScroll = popup.scroll;
   });
-
+  $('#break').on('click',function(){ popup.pageTime('false') })
   $( "#analytics-btn" ).on( "click", function() {
     popup.displayAnalytics();
+    popup.pageTime(true);
   });
 
 });
@@ -21,7 +23,27 @@ function AnalyticsWindow(){
   this.lastScroll = 0;
   this.maxView = 0;
   this.totalScroll = 0;
+  this.startTime = 0;
+  this.timeOnPage = 0;
+  this.signTime = 0;
 }
+
+AnalyticsWindow.prototype.pageTime = function (active) {
+  var change = 0;
+  if(active === true){
+    change = ($.now()-this.startTime)/1000;
+  }
+  this.timeOnPage += change;
+  this.startTime = $.now();
+};
+
+
+AnalyticsWindow.prototype.timeDisplay = function (duration) {
+  var minutes = parseInt(duration/60);
+  var seconds = parseInt(duration%60);
+  return  minutes + ' minutes & ' + seconds +' seconds.'
+};
+
 
 AnalyticsWindow.prototype.scrollUpdate = function () {
   var change = this.lastScroll - this.scroll;
@@ -40,9 +62,11 @@ AnalyticsWindow.prototype.percentViewed= function(){
 }
 
 AnalyticsWindow.prototype.displayAnalytics = function(){
+
   $('#analytics').modal('show');
   $('#page-percent').html(this.percentViewed());
   $('#total-scroll').html('The total scroll was '+ this.totalScroll +' pixels.');
+  $('#page-time').html('Total view time: '+ this.timeDisplay(this.timeOnPage));
 }
 
 
