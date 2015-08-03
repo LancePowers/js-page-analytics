@@ -7,11 +7,11 @@ $(document).on('ready', function() {
       popup.scroll = $(window).scrollTop();
       if(scroll > popup.maxView){popup.maxView = scroll;}
       popup.totalScroll = popup.scrollUpdate();
-      popup.lastScroll = popup.scroll;
       popup.sectionUpdate();
+      popup.lastScroll = popup.scroll;
   });
 
-  $('#break').on('click',function(){ popup.pageTime('false') })
+  $('#break').on('click',function(){ popup.pageTime('false'); this.lastScroll = $.now(); })
 
   $('.well > button').on('click',function(){ popup.signTime = ($.now() - popup.startTime)/1000})
 
@@ -50,6 +50,7 @@ AnalyticsWindow.prototype.sectionUpdate = function(){
   for (var i = 0; i < this.sections.length; i++) {
     if(this.scroll < this.sections[i].range){
       this.sections[i].viewTime += change;
+      break;
     }
   }
     this.sectionTime = $.now();
@@ -87,6 +88,16 @@ AnalyticsWindow.prototype.percentViewed= function(){
   return 'The user viewed ' + viewPercentage.toFixed(2) + "\% of the page";
 }
 
+AnalyticsWindow.prototype.sectionTable =function(){
+  this.sectionUpdate();
+  var sectionDisplay=[];
+  for (var i = 0; i < this.sections.length; i++) {
+    var row = $("<tr><td>section " + (i+1) + "</td><td>Time " + this.timeDisplay(this.sections[i].viewTime) +"</td></tr>");
+    sectionDisplay.push(row);
+  }
+  return sectionDisplay;
+}
+
 AnalyticsWindow.prototype.displayAnalytics = function(){
 
   $('#analytics').modal('show');
@@ -94,6 +105,7 @@ AnalyticsWindow.prototype.displayAnalytics = function(){
   $('#total-scroll').html('The total scroll was '+ this.totalScroll +' pixels.');
   $('#page-time').html('Total view time: '+ this.timeDisplay(this.timeOnPage));
   $('#sign-time').html('The sign up button was clicked in '+ this.timeDisplay(this.signTime) );
+  $('#section-time').html(this.sectionTable());
 }
 
 
