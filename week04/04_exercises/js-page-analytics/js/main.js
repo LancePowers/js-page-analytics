@@ -2,13 +2,13 @@
 var popup = new AnalyticsWindow();
 $(document).on('ready', function() {
 
-  popup.startTime = $.now();
-
+  popup.createSections();
   $(window).scroll(function (event) {
       popup.scroll = $(window).scrollTop();
       if(scroll > popup.maxView){popup.maxView = scroll;}
       popup.totalScroll = popup.scrollUpdate();
       popup.lastScroll = popup.scroll;
+      popup.sectionUpdate();
   });
 
   $('#break').on('click',function(){ popup.pageTime('false') })
@@ -29,13 +29,31 @@ function AnalyticsWindow(){
   this.lastScroll = 0;
   this.maxView = 0;
   this.totalScroll = 0;
-  this.startTime = 0;
+  this.startTime = $.now();
   this.timeOnPage = 0;
   this.signTime = 0;
+  this.sectionTime = $.now();
+  this.sections = [];
 }
 
+AnalyticsWindow.prototype.createSections = function() {
+  var sectionQuantity = $(document).height() / 100;
+  var range = 100;
+  for (var i = 0; i < sectionQuantity; i++) {
+    this.sections.push({'range':range,'viewTime':0});
+    range += 100;
+  }
+}
 
-
+AnalyticsWindow.prototype.sectionUpdate = function(){
+  var change = ($.now()-this.sectionTime)/1000;
+  for (var i = 0; i < this.sections.length; i++) {
+    if(this.scroll < this.sections[i].range){
+      this.sections[i].viewTime += change;
+    }
+  }
+    this.sectionTime = $.now();
+}
 AnalyticsWindow.prototype.pageTime = function (active) {
   var change = 0;
   if(active === true){
@@ -79,5 +97,5 @@ AnalyticsWindow.prototype.displayAnalytics = function(){
 }
 
 
-// Time before clicking the green "Sign Up" button
+
 // Time spent on each section of the page
